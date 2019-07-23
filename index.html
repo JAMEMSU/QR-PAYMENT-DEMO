@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Kanit&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+    }
+
+    canvas {
+      width: 180px !important;
+    }
+
+    .btn-primary {
+      background-color: #113566;
+      border: none;
+      border-radius: 0px;
+    }
+
+    .btn-primary:hover {
+      background-color: #113566;
+      border: none;
+    }
+  </style>
+  <title>Testing Payment</title>
+</head>
+
+<body>
+  <!-- As a link -->
+  <nav class="navbar navbar-dark" style="background-color:#113566;">
+    <div class="container">
+      <a class="navbar-brand" href="#">IT MSU SHOP</a>
+    </div>
+  </nav>
+
+  <div class="container" style="margin-top:40px;">
+    <div class="row">
+
+      <div class="col-md-4">
+        <img src="https://arch.punpromotion.com/wp-content/uploads/2018/08/S__3350530.jpg" alt="" width="100%">
+        <div
+          style="box-shadow:0 3px 5px -1px rgba(0,0,0,.14), 0 6px 10px 0 rgba(0,0,0,.098), 0 1px 18px 0 rgba(0,0,0,.084);padding: 15px;">
+          <h3>ชานมไข่มุก</h3>
+          <p>ราคา 1.00 บาท</p>
+          <button class="btn btn-primary btn-block" id="payment">ชำระเงิน</button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <img src="https://arch.punpromotion.com/wp-content/uploads/2018/08/S__3350530.jpg" alt="" width="100%">
+        <div
+          style="box-shadow:0 3px 5px -1px rgba(0,0,0,.14), 0 6px 10px 0 rgba(0,0,0,.098), 0 1px 18px 0 rgba(0,0,0,.084);padding: 15px;">
+          <h3>ชานมไข่มุก</h3>
+          <p>ราคา 10.00 บาท</p>
+
+        </div>
+      </div>
+
+
+
+
+      <div class="col-md-4">
+        <div
+          style="box-shadow:0 3px 5px -1px rgba(0,0,0,.14), 0 6px 10px 0 rgba(0,0,0,.098), 0 1px 18px 0 rgba(0,0,0,.084);">
+          <div style="padding:15px;background:#113566;text-align:center;"><img src="image/thaiqr.png" alt=""
+              width="130px;"></div>
+          <div id="qrpayment" style="background-color:#fff;text-align:center;margin-top:40px;">
+          </div>
+          <p style="text-align:center;margin-top:10px;font-size: 18px;" id="description"></p>
+          <p style="text-align:center;" id="ref"></p><br>
+        </div>
+
+        <div
+          style="box-shadow:0 3px 5px -1px rgba(0,0,0,.14), 0 6px 10px 0 rgba(0,0,0,.098), 0 1px 18px 0 rgba(0,0,0,.084);text-align: center;padding:30px;margin-top: 40px;">
+          <h3 id="status">รอการสั่งซื้อ</h3>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="js/jquery.qrcode.min.js"></script>
+  <script>
+    $("#payment").click(() => {
+      const data = {
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIiLCJuYW1lIjoiVGVzdGluZyIsInN0YXR1cyI6dHJ1ZX0.HmJUT9xzhsI_UikVTuRgttkX1NofJZCbXCLUwZdhNjg",
+        amount: 1.00
+      }
+      $.ajax({
+        type: "POST",
+        url: 'https://pastcode-studio.me/promptpay/create/qrcode/text', 
+        data: data,
+        dataType: "json",
+        success: (result) => {
+          const {
+            qrcode,
+            referenceNo
+          } = result
+          $('#qrpayment').html('').qrcode(qrcode);
+          $("#description").html('กรุณาสแกน QR CODE และ รอสักครู่')
+          $("#ref").html('ReferenceNo : ' + referenceNo)
+          setInterval(() => {
+            checkpayment(referenceNo)
+          }, 2000)
+        },
+
+      });
+    })
+
+
+    function checkpayment(referenceNo) {
+      $.get(`https://pastcode-studio.me/promptpay/bill/${referenceNo}`, (data) => {
+        if (data.status === false) {
+          $("#status").html('รอการตรวจสอบ')
+        } else {
+          $("#status").html('ชำระเงินเรียบร้อย')
+          setInterval(() => {
+            window.location.replace("index.html")
+          }, 1500)
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
